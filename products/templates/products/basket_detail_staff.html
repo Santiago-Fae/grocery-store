@@ -1,0 +1,131 @@
+{% extends "products/base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Basket #{{ basket.id }} Details</h1>
+        <a href="{% url 'staff_dashboard' %}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left me-2"></i> Back to Dashboard
+        </a>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header {% if basket.status == 'pending' %}bg-warning text-dark{% elif basket.status == 'approved' %}bg-success text-white{% elif basket.status == 'denied' %}bg-danger text-white{% elif basket.status == 'completed' %}bg-secondary text-white{% endif %}">
+                    <h5 class="mb-0">Basket Information</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Basket ID:</strong> {{ basket.id }}</p>
+                    <p><strong>Status:</strong> {{ basket.status|title }}</p>
+                    <p><strong>Created:</strong> {{ basket.created_at|date:"F d, Y H:i" }}</p>
+                    <p><strong>Last Updated:</strong> {{ basket.updated_at|date:"F d, Y H:i" }}</p>
+                    <p><strong>Total Items:</strong> {{ basket.items.count }}</p>
+                    <p><strong>Total Value:</strong> ${{ basket.total_price }}</p>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Customer Information</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Name:</strong> {{ basket.customer.user.username }}</p>
+                    <p><strong>Email:</strong> {{ basket.customer.user.email }}</p>
+                    <p><strong>Phone:</strong> {{ basket.customer.phone|default:"Not provided" }}</p>
+                    <a href="{% url 'customer_detail_staff' basket.customer.id %}" class="btn btn-primary">
+                        <i class="fas fa-user me-2"></i> View Customer Profile
+                    </a>
+                </div>
+            </div>
+            
+            {% if basket.status == 'pending' %}
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <form method="post" action="{% url 'basket_detail_staff' basket.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="approve">
+                            <button type="submit" class="btn btn-success btn-lg w-100 mb-2">
+                                <i class="fas fa-check me-2"></i> Approve Basket
+                            </button>
+                        </form>
+                        <form method="post" action="{% url 'basket_detail_staff' basket.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="deny">
+                            <button type="submit" class="btn btn-danger btn-lg w-100">
+                                <i class="fas fa-times me-2"></i> Deny Basket
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% elif basket.status == 'approved' %}
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Actions</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'basket_detail_staff' basket.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="complete">
+                        <button type="submit" class="btn btn-success btn-lg w-100">
+                            <i class="fas fa-check-double me-2"></i> Mark as Completed
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Basket Items</h5>
+                </div>
+                <div class="card-body">
+                    {% if basket.items.all %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Product ID</th>
+                                    <th>Product</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th>Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in basket.items.all %}
+                                <tr>
+                                    <td>{{ item.product.id }}</td>
+                                    <td>{{ item.product.name }}</td>
+                                    <td>${{ item.product.price }}</td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td>${{ item.item_price }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-active">
+                                    <td colspan="4" class="text-end"><strong>Total:</strong></td>
+                                    <td><strong>${{ basket.total_price }}</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i> This basket is empty.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,75 @@
+{% extends "products/base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Customer Search</h1>
+        <a href="{% url 'staff_dashboard' %}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left me-2"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-8">
+                    <div class="input-group">
+                        <input type="text" name="q" class="form-control" placeholder="Search by username, email, or phone..." value="{{ query }}">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search me-2"></i> Search
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if query %}
+        {% if customers %}
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Search Results</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Address</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for customer in customers %}
+                                <tr>
+                                    <td>{{ customer.user.username }}</td>
+                                    <td>{{ customer.user.email }}</td>
+                                    <td>{{ customer.phone|default:"-" }}</td>
+                                    <td>{{ customer.address|default:"-"|truncatechars:50 }}</td>
+                                    <td>
+                                        <a href="{% url 'customer_detail_staff' customer.id %}" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-eye me-1"></i> View Details
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i> No customers found matching your search criteria.
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i> Enter a search term to find customers.
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

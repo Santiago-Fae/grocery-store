@@ -1,0 +1,91 @@
+{% extends "products/base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>My Basket</h1>
+        <a href="{% url 'product_list' %}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left me-2"></i> Continue Shopping
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            {% if basket.items.all %}
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Basket Items</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th>Subtotal</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in basket.items.all %}
+                                <tr>
+                                    <td>{{ item.product.name }}</td>
+                                    <td>${{ item.product.price }}</td>
+                                    <td>
+                                        <form method="post" action="{% url 'update_basket_item' item.id %}" class="d-flex align-items-center">
+                                            {% csrf_token %}
+                                            <input type="number" name="quantity" value="{{ item.quantity }}" min="1" class="form-control form-control-sm" style="width: 70px;">
+                                            <button type="submit" class="btn btn-sm btn-outline-primary ms-2">
+                                                <i class="fas fa-sync-alt"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                    <td>${{ item.item_price }}</td>
+                                    <td>
+                                        <form method="post" action="{% url 'remove_from_basket' item.id %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-active">
+                                    <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                                    <td colspan="2"><strong>${{ basket.total_price }}</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-shopping-basket me-2"></i> Your basket is empty. 
+                <a href="{% url 'product_list' %}" class="alert-link">Start shopping</a> to add items to your basket.
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Basket Summary</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Total Items:</strong> {{ basket.items.count }}</p>
+                    <p><strong>Total Value:</strong> ${{ basket.total_price }}</p>
+                    <p><strong>Status:</strong> <span class="badge {% if basket.status == 'pending' %}bg-warning{% elif basket.status == 'approved' %}bg-success{% elif basket.status == 'denied' %}bg-danger{% endif %}">{{ basket.status|title }}</span></p>
+                    <p><strong>Created:</strong> {{ basket.created_at|date:"F d, Y H:i" }}</p>
+                    <p><strong>Last Updated:</strong> {{ basket.updated_at|date:"F d, Y H:i" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

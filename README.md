@@ -4,19 +4,30 @@ A simple web application for managing grocery store products built with Django.
 
 ## Description
 
-This is a Django-based web application for managing a grocery store's inventory. It allows for the creation, updating, viewing, and deletion of products.
+This is a Django-based web application for managing a grocery store's inventory. It allows for the creation, updating, viewing, and deletion of products, as well as customer basket management and purchase tracking.
 
 ## Features
 
-- Product inventory management
+- User authentication (customers and staff)
+- Product inventory management (product ID, name, and price)
 - Admin interface for product management
-- Basic CRUD operations for products
+- Customer features:
+  - Adding products to baskets
+  - Viewing basket status
+  - Viewing purchase history
+- Staff features:
+  - Adding/updating products
+  - Approving or denying customer baskets
+  - Querying customer information
+  - Viewing customer purchase history
 
 ## Technologies Used
 
 - Django 5.2
 - Python
 - SQLite database
+- Bootstrap 5
+- Font Awesome
 
 ## Getting Started
 
@@ -49,12 +60,32 @@ This is a Django-based web application for managing a grocery store's inventory.
    python manage.py migrate
    ```
 
-5. Start the development server
+5. Create a superuser for admin access
+   ```
+   python manage.py createsuperuser
+   ```
+
+6. Start the development server
    ```
    python manage.py runserver
    ```
 
-6. Access the application at http://127.0.0.1:8000/
+7. Access the application at http://127.0.0.1:8000/
+
+## Usage
+
+### Customer Actions
+- Register/login to your account
+- Browse available products
+- Add products to your basket
+- View your basket status and purchase history
+
+### Staff Actions
+- Login as a staff member
+- Add or update products
+- View customer baskets
+- Approve or deny customer baskets
+- View customer information and purchase history
 
 ## License
 

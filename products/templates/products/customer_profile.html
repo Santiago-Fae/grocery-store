@@ -1,0 +1,113 @@
+{% extends "products/base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Profile Information</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Username:</strong> {{ customer.user.username }}</p>
+                    <p><strong>Email:</strong> {{ customer.user.email }}</p>
+                    <p><strong>Name:</strong> {{ customer.user.first_name }} {{ customer.user.last_name }}</p>
+                    <p><strong>Phone:</strong> {{ customer.phone|default:"Not provided" }}</p>
+                    <p><strong>Address:</strong> {{ customer.address|default:"Not provided" }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <h2>Current Baskets</h2>
+            {% if baskets %}
+                {% for basket in baskets %}
+                <div class="card mb-3">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>Basket #{{ basket.id }} - <span class="badge {% if basket.status == 'pending' %}bg-warning{% elif basket.status == 'approved' %}bg-success{% elif basket.status == 'denied' %}bg-danger{% endif %}">{{ basket.status|title }}</span></span>
+                        <span>{{ basket.created_at|date:"F d, Y" }}</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Quantity</th>
+                                        <th>Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in basket.items.all %}
+                                    <tr>
+                                        <td>{{ item.product.name }}</td>
+                                        <td>{{ item.quantity }}</td>
+                                        <td>${{ item.item_price }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="2" class="text-end"><strong>Total:</strong></td>
+                                        <td><strong>${{ basket.total_price }}</strong></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                    {% if basket.status == 'pending' %}
+                    <div class="card-footer">
+                        <a href="{% url 'basket' %}" class="btn btn-sm btn-primary">View Basket</a>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="alert alert-info">You have no active baskets.</div>
+            {% endif %}
+            
+            <h2 class="mt-4">Purchase History</h2>
+            {% if purchases %}
+                <div class="list-group">
+                    {% for purchase in purchases %}
+                    <div class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">Purchase #{{ purchase.id }}</h5>
+                            <small>{{ purchase.purchase_date|date:"F d, Y" }}</small>
+                        </div>
+                        <p class="mb-1">Total: ${{ purchase.total_amount }}</p>
+                        <button class="btn btn-sm btn-outline-primary mt-2" type="button" data-bs-toggle="collapse" data-bs-target="#purchase{{ purchase.id }}">
+                            Show Details
+                        </button>
+                        <div class="collapse mt-2" id="purchase{{ purchase.id }}">
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Product</th>
+                                            <th>Quantity</th>
+                                            <th>Price</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in purchase.basket.items.all %}
+                                        <tr>
+                                            <td>{{ item.product.name }}</td>
+                                            <td>{{ item.quantity }}</td>
+                                            <td>${{ item.item_price }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info">You have no purchase history.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

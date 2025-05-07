@@ -1,0 +1,184 @@
+{% extends "products/base.html" %}
+{% load basket_filters %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Customer Details</h1>
+        <div>
+            <a href="{% url 'customer_search' %}" class="btn btn-outline-primary me-2">
+                <i class="fas fa-arrow-left me-2"></i> Back to Search
+            </a>
+            <a href="{% url 'staff_dashboard' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Customer Information</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Username:</strong> {{ customer.user.username }}</p>
+                    <p><strong>Email:</strong> {{ customer.user.email }}</p>
+                    <p><strong>Phone:</strong> {{ customer.phone|default:"Not provided" }}</p>
+                    <p><strong>Address:</strong> {{ customer.address|default:"Not provided"|linebreaks }}</p>
+                    <p><strong>Date Joined:</strong> {{ customer.user.date_joined|date:"F d, Y" }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <h2>Baskets</h2>
+            <ul class="nav nav-tabs mb-3" id="basketTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="all-baskets-tab" data-bs-toggle="tab" data-bs-target="#all-baskets" type="button" role="tab">
+                        All Baskets
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="pending-baskets-tab" data-bs-toggle="tab" data-bs-target="#pending-baskets" type="button" role="tab">
+                        Pending
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="approved-baskets-tab" data-bs-toggle="tab" data-bs-target="#approved-baskets" type="button" role="tab">
+                        Approved
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="denied-baskets-tab" data-bs-toggle="tab" data-bs-target="#denied-baskets" type="button" role="tab">
+                        Denied
+                    </button>
+                </li>
+            </ul>
+            
+            <div class="tab-content" id="basketTabsContent">
+                <!-- All Baskets Tab -->
+                <div class="tab-pane fade show active" id="all-baskets" role="tabpanel">
+                    {% if baskets %}
+                    <div class="list-group">
+                        {% for basket in baskets %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between align-items-center">
+                                <h5 class="mb-1">
+                                    Basket #{{ basket.id }} 
+                                    <span class="badge {% if basket.status == 'pending' %}bg-warning{% elif basket.status == 'approved' %}bg-success{% elif basket.status == 'denied' %}bg-danger{% elif basket.status == 'completed' %}bg-secondary{% endif %}">
+                                        {{ basket.status|title }}
+                                    </span>
+                                </h5>
+                                <small>{{ basket.created_at|date:"F d, Y" }}</small>
+                            </div>
+                            <p>Total Items: {{ basket.items.count }} | Total Value: ${{ basket.total_price }}</p>
+                            <a href="{% url 'basket_detail_staff' basket.id %}" class="btn btn-sm btn-primary">View Details</a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">This customer has no baskets.</div>
+                    {% endif %}
+                </div>
+                
+                <!-- Pending Baskets Tab -->
+                <div class="tab-pane fade" id="pending-baskets" role="tabpanel">
+                    {% with pending_baskets=baskets|dictsortreversed:"created_at"|filter_status:"pending" %}
+                    {% if pending_baskets %}
+                    <div class="list-group">
+                        {% for basket in pending_baskets %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between align-items-center">
+                                <h5 class="mb-1">Basket #{{ basket.id }}</h5>
+                                <small>{{ basket.created_at|date:"F d, Y" }}</small>
+                            </div>
+                            <p>Total Items: {{ basket.items.count }} | Total Value: ${{ basket.total_price }}</p>
+                            <a href="{% url 'basket_detail_staff' basket.id %}" class="btn btn-sm btn-primary">View Details</a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">This customer has no pending baskets.</div>
+                    {% endif %}
+                    {% endwith %}
+                </div>
+                
+                <!-- Approved Baskets Tab -->
+                <div class="tab-pane fade" id="approved-baskets" role="tabpanel">
+                    {% with approved_baskets=baskets|dictsortreversed:"created_at"|filter_status:"approved" %}
+                    {% if approved_baskets %}
+                    <div class="list-group">
+                        {% for basket in approved_baskets %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between align-items-center">
+                                <h5 class="mb-1">Basket #{{ basket.id }}</h5>
+                                <small>{{ basket.created_at|date:"F d, Y" }}</small>
+                            </div>
+                            <p>Total Items: {{ basket.items.count }} | Total Value: ${{ basket.total_price }}</p>
+                            <a href="{% url 'basket_detail_staff' basket.id %}" class="btn btn-sm btn-primary">View Details</a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">This customer has no approved baskets.</div>
+                    {% endif %}
+                    {% endwith %}
+                </div>
+                
+                <!-- Denied Baskets Tab -->
+                <div class="tab-pane fade" id="denied-baskets" role="tabpanel">
+                    {% with denied_baskets=baskets|dictsortreversed:"created_at"|filter_status:"denied" %}
+                    {% if denied_baskets %}
+                    <div class="list-group">
+                        {% for basket in denied_baskets %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between align-items-center">
+                                <h5 class="mb-1">Basket #{{ basket.id }}</h5>
+                                <small>{{ basket.created_at|date:"F d, Y" }}</small>
+                            </div>
+                            <p>Total Items: {{ basket.items.count }} | Total Value: ${{ basket.total_price }}</p>
+                            <a href="{% url 'basket_detail_staff' basket.id %}" class="btn btn-sm btn-primary">View Details</a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">This customer has no denied baskets.</div>
+                    {% endif %}
+                    {% endwith %}
+                </div>
+            </div>
+
+            <h2 class="mt-4">Purchase History</h2>
+            {% if purchases %}
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Purchase Date</th>
+                                    <th>Basket ID</th>
+                                    <th>Total Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for purchase in purchases %}
+                                <tr>
+                                    <td>{{ purchase.purchase_date|date:"F d, Y H:i" }}</td>
+                                    <td>#{{ purchase.basket.id }}</td>
+                                    <td>${{ purchase.total_amount }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-info">This customer has no purchase history.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 
