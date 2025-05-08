@@ -14,8 +14,6 @@ from .models import Product, Customer, Basket, BasketItem, Purchase
 def is_staff(user):
     return user.is_staff
 
-# Create your views here.
-
 # User Registration
 class UserRegistrationForm(UserCreationForm):
     email = forms.EmailField(required=True)
@@ -28,27 +26,14 @@ class UserRegistrationForm(UserCreationForm):
     class Meta:
         model = User
         fields = ['username', 'email', 'first_name', 'last_name', 'password1', 'password2', 'is_staff', 'phone', 'address']
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Add Bootstrap classes to form fields
-        for field_name in self.fields:
-            if field_name == 'is_staff':
-                self.fields[field_name].widget.attrs['class'] = 'form-check-input'
-            else:
-                self.fields[field_name].widget.attrs['class'] = 'form-control'
-                self.fields[field_name].widget.attrs['placeholder'] = self.fields[field_name].label
 
 def register_user(request):
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
-            # Create user
             user = form.save(commit=False)
             user.is_staff = form.cleaned_data.get('is_staff')
             user.save()
-            
-            # Create customer profile
             phone = form.cleaned_data.get('phone')
             address = form.cleaned_data.get('address')
             Customer.objects.create(
@@ -86,7 +71,7 @@ class ProductUpdateView(StaffRequiredMixin, UpdateView):
     fields = ['name', 'price']
     success_url = reverse_lazy('product_list')
 
-# Customer Views
+# Customer
 @login_required
 def customer_profile(request):
     try:
@@ -103,7 +88,7 @@ def customer_profile(request):
         'purchases': purchases
     })
 
-# Basket Views
+# Basket
 @login_required
 def basket_view(request):
     try:
@@ -236,10 +221,16 @@ def customer_search(request):
 def customer_detail_staff(request, customer_id):
     customer = get_object_or_404(Customer, id=customer_id)
     baskets = customer.baskets.all().order_by('-created_at')
+    pending_baskets = baskets.filter(status='pending')
+    approved_baskets = baskets.filter(status='approved')
+    denied_baskets = baskets.filter(status='denied')
     purchases = Purchase.objects.filter(basket__customer=customer).order_by('-purchase_date')
     
     return render(request, 'products/customer_detail_staff.html', {
         'customer': customer,
         'baskets': baskets,
+        'pending_baskets': pending_baskets,
+        'approved_baskets': approved_baskets,
+        'denied_baskets': denied_baskets,
         'purchases': purchases
     })

@@ -1,5 +1,4 @@
 {% extends "products/base.html" %}
-{% load basket_filters %}
 
 {% block content %}
 <div class="container mt-4">
@@ -84,7 +83,6 @@
                 
                 <!-- Pending Baskets Tab -->
                 <div class="tab-pane fade" id="pending-baskets" role="tabpanel">
-                    {% with pending_baskets=baskets|dictsortreversed:"created_at"|filter_status:"pending" %}
                     {% if pending_baskets %}
                     <div class="list-group">
                         {% for basket in pending_baskets %}
@@ -101,12 +99,10 @@
                     {% else %}
                     <div class="alert alert-info">This customer has no pending baskets.</div>
                     {% endif %}
-                    {% endwith %}
                 </div>
                 
                 <!-- Approved Baskets Tab -->
                 <div class="tab-pane fade" id="approved-baskets" role="tabpanel">
-                    {% with approved_baskets=baskets|dictsortreversed:"created_at"|filter_status:"approved" %}
                     {% if approved_baskets %}
                     <div class="list-group">
                         {% for basket in approved_baskets %}
@@ -123,12 +119,10 @@
                     {% else %}
                     <div class="alert alert-info">This customer has no approved baskets.</div>
                     {% endif %}
-                    {% endwith %}
                 </div>
                 
                 <!-- Denied Baskets Tab -->
                 <div class="tab-pane fade" id="denied-baskets" role="tabpanel">
-                    {% with denied_baskets=baskets|dictsortreversed:"created_at"|filter_status:"denied" %}
                     {% if denied_baskets %}
                     <div class="list-group">
                         {% for basket in denied_baskets %}
@@ -145,7 +139,6 @@
                     {% else %}
                     <div class="alert alert-info">This customer has no denied baskets.</div>
                     {% endif %}
-                    {% endwith %}
                 </div>
             </div>
 
